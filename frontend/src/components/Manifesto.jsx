@@ -1,10 +1,13 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { manifesto } from '../mock';
+import { useSiteData } from '../context/SiteDataContext';
 
 export const Manifesto = () => {
+  const { manifesto } = useSiteData();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
+
+  if (!manifesto || manifesto.length === 0) return null;
 
   return (
     <section ref={ref} className="py-32 bg-zinc-950 relative overflow-hidden">

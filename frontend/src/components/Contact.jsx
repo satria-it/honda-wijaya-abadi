@@ -1,10 +1,11 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
-import { companyInfo } from '../mock';
 import { Button } from './ui/button';
+import { useSiteData } from '../context/SiteDataContext';
 
 export const Contact = () => {
+  const { settings: companyInfo } = useSiteData();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 

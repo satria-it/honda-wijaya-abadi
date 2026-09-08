@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 import { Facebook, Instagram, Twitter, Youtube, Heart } from 'lucide-react';
-import { companyInfo } from '../mock';
+import { useSiteData } from '../context/SiteDataContext';
+import { resolveImageUrl } from '../services/api';
 
 export const Footer = () => {
+  const { settings: companyInfo } = useSiteData();
   const currentYear = new Date().getFullYear();
 
   const socialLinks = [
@@ -46,8 +48,12 @@ export const Footer = () => {
               viewport={{ once: true }}
             >
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center font-bold text-white text-xl">
-                  H
+                <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center font-bold text-white text-xl overflow-hidden">
+                  {companyInfo.logo ? (
+                    <img src={resolveImageUrl(companyInfo.logo)} alt="Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    'H'
+                  )}
                 </div>
                 <div>
                   <div className="font-bold text-xl text-white font-['Sora']">
@@ -57,7 +63,7 @@ export const Footer = () => {
                 </div>
               </div>
               <p className="text-gray-400 leading-relaxed mb-6">
-                Dealer resmi Honda terpercaya yang siap melayani kebutuhan kendaraan Anda dengan profesional dan amanah.
+                {companyInfo.footerText || 'Dealer resmi Honda terpercaya yang siap melayani kebutuhan kendaraan Anda dengan profesional dan amanah.'}
               </p>
               
               {/* Social Links */}

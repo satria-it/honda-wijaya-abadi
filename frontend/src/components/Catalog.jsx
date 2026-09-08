@@ -1,19 +1,21 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
-import { motorcycles } from '../mock';
-import { ArrowRight, Gauge, Zap } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
-import { companyInfo } from '../mock';
+import { useSiteData } from '../context/SiteDataContext';
+import { publicApi, resolveImageUrl } from '../services/api';
 
 export const Catalog = () => {
+  const { motors: motorcycles, settings } = useSiteData();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const [selectedMotor, setSelectedMotor] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -24,7 +26,7 @@ export const Catalog = () => {
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.name || !formData.phone) {
@@ -32,9 +34,22 @@ export const Catalog = () => {
       return;
     }
 
+    setSubmitting(true);
+    try {
+      // Save to backend
+      await publicApi.createInterest({
+        name: formData.name,
+        phone: formData.phone,
+        motor_id: selectedMotor.id,
+        motor_name: selectedMotor.name,
+      });
+    } catch (err) {
+      console.error('Failed to save interest', err);
+    }
+
     // Format WhatsApp message
     const message = `Halo, saya tertarik dengan:\n\nMotor: ${selectedMotor.name}\nNama: ${formData.name}\nNo. HP: ${formData.phone}\n\nMohon info lebih lanjut. Terima kasih!`;
-    const waUrl = `https://wa.me/${companyInfo.phone}?text=${encodeURIComponent(message)}`;
+    const waUrl = `https://wa.me/${settings.phone}?text=${encodeURIComponent(message)}`;
     
     // Open WhatsApp
     window.open(waUrl, '_blank');
@@ -42,6 +57,7 @@ export const Catalog = () => {
     // Reset form
     setFormData({ name: '', phone: '' });
     setIsDialogOpen(false);
+    setSubmitting(false);
     toast.success('Mengarahkan ke WhatsApp...');
   };
 
@@ -106,7 +122,7 @@ export const Catalog = () => {
                   <motion.img
                     whileHover={{ scale: 1.1 }}
                     transition={{ duration: 0.6 }}
-                    src={motor.image}
+                    src={resolveImageUrl(motor.image)}
                     alt={motor.name}
                     className="w-full h-full object-cover"
                   />
@@ -194,9 +210,11 @@ export const Catalog = () => {
             </div>
             <Button
               type="submit"
+              data-testid="interest-submit"
+              disabled={submitting}
               className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold"
             >
-              Kirim ke WhatsApp
+              {submitting ? 'Memproses...' : 'Kirim ke WhatsApp'}
             </Button>
           </form>
         </DialogContent>

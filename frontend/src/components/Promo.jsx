@@ -1,9 +1,8 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { promos } from '../mock';
 import { Percent, TrendingDown, CreditCard, ArrowRight } from 'lucide-react';
 import { Button } from './ui/button';
-import { companyInfo } from '../mock';
+import { useSiteData } from '../context/SiteDataContext';
 
 const iconMap = {
   0: Percent,
@@ -12,13 +11,16 @@ const iconMap = {
 };
 
 export const Promo = () => {
+  const { promos, settings } = useSiteData();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   const handleWhatsApp = () => {
     const message = 'Halo, saya ingin mengetahui info promo terbaru!';
-    window.open(`https://wa.me/${companyInfo.phone}?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/${settings.phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
+
+  if (!promos || promos.length === 0) return null;
 
   return (
     <section id="promo" ref={ref} className="py-32 bg-zinc-950 relative overflow-hidden">
@@ -45,7 +47,7 @@ export const Promo = () => {
 
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           {promos.map((promo, index) => {
-            const Icon = iconMap[index];
+                const Icon = iconMap[index] || Percent;
             return (
               <motion.div
                 key={promo.id}

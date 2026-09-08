@@ -1,20 +1,23 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Zap, Award, Clock } from 'lucide-react';
 import { Button } from './ui/button';
-import { companyInfo } from '../mock';
+import { useSiteData } from '../context/SiteDataContext';
+import { resolveImageUrl } from '../services/api';
 
 export const Hero = () => {
+  const { settings } = useSiteData();
+
   const handleWhatsApp = () => {
-    window.open(`https://wa.me/${companyInfo.phone}`, '_blank');
+    window.open(`https://wa.me/${settings.phone}`, '_blank');
   };
 
   const scrollToKatalog = () => {
     document.querySelector('#katalog')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Split text animation
-  const title = "Berkendara Dengan";
-  const titleHighlight = "Kebanggaan";
+  // Split text animation from settings
+  const title = settings.heroTitle || "Berkendara Dengan";
+  const titleHighlight = settings.heroTitleHighlight || "Kebanggaan";
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -70,7 +73,7 @@ export const Hero = () => {
             initial={{ x: 100, opacity: 0 }}
             animate={{ x: 0, opacity: 0.6 }}
             transition={{ duration: 1.2, delay: 0.5 }}
-            src={companyInfo.heroImage}
+            src={resolveImageUrl(settings.heroImage)}
             alt="Honda Motor"
             className="absolute right-0 h-full w-full object-cover object-center"
             style={{
@@ -134,7 +137,7 @@ export const Hero = () => {
             transition={{ delay: 1, duration: 0.8 }}
             className="text-xl md:text-2xl text-gray-400 mb-12 max-w-2xl leading-relaxed"
           >
-            {companyInfo.tagline}. Dapatkan motor Honda impian Anda dengan harga terbaik dan proses yang mudah.
+            {settings.heroSubtitle || `${settings.tagline}. Dapatkan motor Honda impian Anda dengan harga terbaik dan proses yang mudah.`}
           </motion.p>
 
           {/* CTA Buttons */}

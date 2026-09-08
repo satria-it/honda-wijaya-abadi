@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Phone } from 'lucide-react';
-import { companyInfo } from '../mock';
+import { useSiteData } from '../context/SiteDataContext';
+import { resolveImageUrl } from '../services/api';
 import { Button } from './ui/button';
 
 export const Header = () => {
+  const { settings } = useSiteData();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -25,7 +27,7 @@ export const Header = () => {
   ];
 
   const handleWhatsApp = () => {
-    window.open(`https://wa.me/${companyInfo.phone}`, '_blank');
+    window.open(`https://wa.me/${settings.phone}`, '_blank');
   };
 
   const scrollToSection = (href) => {
@@ -57,12 +59,16 @@ export const Header = () => {
             className="flex items-center space-x-3 cursor-pointer"
             onClick={() => scrollToSection('#home')}
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center font-bold text-white">
-              H
+            <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-lg flex items-center justify-center font-bold text-white overflow-hidden">
+              {settings.logo ? (
+                <img src={resolveImageUrl(settings.logo)} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                'H'
+              )}
             </div>
             <div>
               <div className="font-bold text-lg leading-none text-white font-['Sora']">
-                Honda Wijaya Abadi
+                {settings.name?.split(' Motor')[0] || 'Honda Wijaya Abadi'}
               </div>
               <div className="text-xs text-gray-400">Motor</div>
             </div>

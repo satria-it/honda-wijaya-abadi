@@ -1,11 +1,14 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { testimonials } from '../mock';
 import { Star, Quote } from 'lucide-react';
+import { useSiteData } from '../context/SiteDataContext';
 
 export const Testimonials = () => {
+  const { testimonials } = useSiteData();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
+
+  if (!testimonials || testimonials.length === 0) return null;
 
   return (
     <section id="testimoni" ref={ref} className="py-32 bg-black relative overflow-hidden">
