@@ -21,7 +21,7 @@ const formatIDR = (n) => {
 export const CreditSimulator = ({ open, onOpenChange, motor, onProceed }) => {
   const otr = useMemo(() => parsePrice(motor?.price), [motor]);
   const [dpPct, setDpPct] = useState(20);
-  const [tenor, setTenor] = useState(24);
+  const [tenor, setTenor] = useState(23);
   // Estimated interest rate per year (indicative, common for motor credit)
   const [rate, setRate] = useState(9);
 
@@ -35,7 +35,7 @@ export const CreditSimulator = ({ open, onOpenChange, motor, onProceed }) => {
   }, [otr, dpPct, tenor, rate]);
 
   const dpOptions = [10, 15, 20, 25, 30, 40, 50];
-  const tenorOptions = [12, 24, 35, 47];
+  const tenorOptions = [11, 17, 23, 29, 35];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -149,10 +149,6 @@ export const CreditSimulator = ({ open, onOpenChange, motor, onProceed }) => {
                 <div className="flex justify-between text-gray-400">
                   <span>Total pinjaman</span>
                   <span className="text-white">{formatIDR(calc.financed)}</span>
-                </div>
-                <div className="flex justify-between text-gray-400">
-                  <span>Total bunga</span>
-                  <span className="text-white">{formatIDR(calc.totalInterest)}</span>
                 </div>
                 <div className="flex justify-between text-gray-400 pt-2 border-t border-white/10">
                   <span>Total bayar (setelah DP)</span>
