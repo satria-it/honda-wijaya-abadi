@@ -1,6 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Calculator } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Input } from './ui/input';
@@ -8,6 +8,7 @@ import { Label } from './ui/label';
 import { toast } from 'sonner';
 import { useSiteData } from '../context/SiteDataContext';
 import { publicApi, resolveImageUrl } from '../services/api';
+import { CreditSimulator } from './CreditSimulator';
 
 export const Catalog = () => {
   const { motors: motorcycles, settings } = useSiteData();
@@ -15,6 +16,7 @@ export const Catalog = () => {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const [selectedMotor, setSelectedMotor] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -24,6 +26,11 @@ export const Catalog = () => {
   const handleInterest = (motor) => {
     setSelectedMotor(motor);
     setIsDialogOpen(true);
+  };
+
+  const handleOpenSimulator = (motor) => {
+    setSelectedMotor(motor);
+    setIsSimulatorOpen(true);
   };
 
   const handleSubmit = async (e) => {
@@ -168,19 +175,31 @@ export const Catalog = () => {
                   </div>
 
                   {/* Price & CTA */}
-                  <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                    <div>
-                      <div className="text-xs text-gray-500 mb-1">Mulai dari</div>
-                      <div className="text-2xl font-bold text-red-500 font-['Sora']">
-                        {motor.price}
+                  <div className="pt-4 border-t border-white/10 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Mulai dari</div>
+                        <div className="text-2xl font-bold text-red-500 font-['Sora']">
+                          {motor.price}
+                        </div>
                       </div>
+                      <Button
+                        onClick={() => handleInterest(motor)}
+                        data-testid={`motor-interest-${motor.id}`}
+                        className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2 flex items-center space-x-2 shadow-lg hover:shadow-red-500/50 transition-all duration-300 group"
+                      >
+                        <span>Minat</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Button>
                     </div>
                     <Button
-                      onClick={() => handleInterest(motor)}
-                      className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2 flex items-center space-x-2 shadow-lg hover:shadow-red-500/50 transition-all duration-300 group"
+                      onClick={() => handleOpenSimulator(motor)}
+                      variant="outline"
+                      data-testid={`motor-simulator-${motor.id}`}
+                      className="w-full border-white/20 bg-transparent text-gray-300 hover:bg-red-600/10 hover:text-red-400 hover:border-red-500/50 transition-all duration-300 flex items-center justify-center space-x-2"
                     >
-                      <span>Minat</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      <Calculator className="w-4 h-4" />
+                      <span>Simulasi Kredit</span>
                     </Button>
                   </div>
                 </div>
@@ -233,6 +252,13 @@ export const Catalog = () => {
           </form>
         </DialogContent>
       </Dialog>
+      {/* Credit Simulator */}
+      <CreditSimulator
+        open={isSimulatorOpen}
+        onOpenChange={setIsSimulatorOpen}
+        motor={selectedMotor}
+        onProceed={() => handleInterest(selectedMotor)}
+      />
     </section>
   );
 };

@@ -2,6 +2,7 @@ import { Navigate, Outlet, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, Bike, Tag, MessageSquare, Users, Settings, LogOut, User, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
+import { NotificationBell } from './NotificationBell';
 
 export const AdminLayout = () => {
   const { admin, loading, logout } = useAuth();
@@ -85,8 +86,15 @@ export const AdminLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 p-8">
-        <Outlet />
+      <main className="flex-1 ml-64">
+        {/* Top Bar with Notification Bell */}
+        <div className="sticky top-0 z-30 bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 flex justify-end items-center px-8 py-3">
+          <NotificationBell />
+        </div>
+
+        <div className="p-8">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

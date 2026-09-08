@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trash2, Phone, Send, User, Bike, Calendar, Search, Filter, Check, Clock, CheckCircle } from 'lucide-react';
+import { Trash2, Phone, Send, User, Bike, Calendar, Search, Filter, Check, Clock, CheckCircle, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { adminApi, publicApi } from '../../services/api';
 import { Button } from '../../components/ui/button';
@@ -116,11 +116,51 @@ export default function AdminInterests() {
     }, {});
   }, [items]);
 
+  const exportCSV = () => {
+    if (filteredItems.length === 0) {
+      toast.error('Tidak ada data untuk diekspor');
+      return;
+    }
+    const escape = (v) => {
+      const s = String(v ?? '').replace(/"/g, '""');
+      return /[",\n]/.test(s) ? `"${s}"` : s;
+    };
+    const header = ['Nama', 'No HP', 'Motor', 'Status', 'Tanggal'];
+    const rows = filteredItems.map((it) => [
+      it.name,
+      it.phone,
+      it.motor_name,
+      STATUS_META[it.status]?.label || it.status,
+      formatDate(it.created_at),
+    ]);
+    const csv = '\ufeff' + [header, ...rows].map((r) => r.map(escape).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `minat-konsumen-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(`${filteredItems.length} data diekspor ke CSV`);
+  };
+
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white font-['Sora'] mb-2">Minat Konsumen</h1>
-        <p className="text-gray-400">Kelola dan pantau minat calon konsumen</p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-4xl font-bold text-white font-['Sora'] mb-2">Minat Konsumen</h1>
+          <p className="text-gray-400">Kelola dan pantau minat calon konsumen</p>
+        </div>
+        <Button
+          onClick={exportCSV}
+          data-testid="admin-export-csv"
+          className="bg-red-600 hover:bg-red-700 text-white rounded-lg px-6"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Export CSV
+        </Button>
       </div>
 
       {/* Filters Card */}
