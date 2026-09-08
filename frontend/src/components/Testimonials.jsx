@@ -8,8 +8,6 @@ export const Testimonials = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
-  if (!testimonials || testimonials.length === 0) return null;
-
   return (
     <section id="testimoni" ref={ref} className="py-32 bg-black relative overflow-hidden">
       {/* Background */}
@@ -31,8 +29,7 @@ export const Testimonials = () => {
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {testimonials.map((testimonial, index) => (
-            <motion.div
+          {testimonials.map((testimonial, index) => (            <motion.div
               key={testimonial.id}
               initial={{ opacity: 0, y: 50 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -104,7 +101,7 @@ export const Testimonials = () => {
         </motion.div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes marquee {
           0% {
             transform: translateX(0);

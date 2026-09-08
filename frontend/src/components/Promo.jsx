@@ -20,7 +20,9 @@ export const Promo = () => {
     window.open(`https://wa.me/${settings.phone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
-  if (!promos || promos.length === 0) return null;
+  if (!promos || promos.length === 0) return (
+    <section id="promo" ref={ref} className="py-32 bg-zinc-950" />
+  );
 
   return (
     <section id="promo" ref={ref} className="py-32 bg-zinc-950 relative overflow-hidden">
