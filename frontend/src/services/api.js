@@ -48,6 +48,7 @@ export const adminApi = {
 
   // Stats
   getStats: () => api.get('/admin/stats').then(r => r.data),
+  getAnalytics: () => api.get('/admin/analytics').then(r => r.data),
 
   // Motors
   createMotor: (data) => api.post('/admin/motors', data).then(r => r.data),

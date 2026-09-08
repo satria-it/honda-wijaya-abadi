@@ -13,6 +13,8 @@ import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/context/AuthContext";
 import { SiteDataProvider } from "@/context/SiteDataContext";
+import { CompareProvider } from "@/context/CompareContext";
+import { CompareBar } from "@/components/CompareBar";
 import { AdminLayout } from "@/components/AdminLayout";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -37,26 +39,29 @@ const Home = () => {
 
   return (
     <SiteDataProvider>
-      <SmoothScroll>
-        <div className="relative">
-          <div
-            className="cursor-glow hidden md:block"
-            style={{
-              left: `${cursorPosition.x}px`,
-              top: `${cursorPosition.y}px`,
-              transform: 'translate(-50%, -50%)',
-            }}
-          />
-          <Header />
-          <Hero />
-          <Manifesto />
-          <Catalog />
-          <Promo />
-          <Testimonials />
-          <Contact />
-          <Footer />
-        </div>
-      </SmoothScroll>
+      <CompareProvider>
+        <SmoothScroll>
+          <div className="relative">
+            <div
+              className="cursor-glow hidden md:block"
+              style={{
+                left: `${cursorPosition.x}px`,
+                top: `${cursorPosition.y}px`,
+                transform: 'translate(-50%, -50%)',
+              }}
+            />
+            <Header />
+            <Hero />
+            <Manifesto />
+            <Catalog />
+            <Promo />
+            <Testimonials />
+            <Contact />
+            <Footer />
+            <CompareBar />
+          </div>
+        </SmoothScroll>
+      </CompareProvider>
     </SiteDataProvider>
   );
 };

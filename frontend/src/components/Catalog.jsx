@@ -1,17 +1,19 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
-import { ArrowRight, Calculator } from 'lucide-react';
+import { ArrowRight, Calculator, GitCompare, Check } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
 import { useSiteData } from '../context/SiteDataContext';
+import { useCompare } from '../context/CompareContext';
 import { publicApi, resolveImageUrl } from '../services/api';
 import { CreditSimulator } from './CreditSimulator';
 
 export const Catalog = () => {
   const { motors: motorcycles, settings } = useSiteData();
+  const { isSelected, toggle: toggleCompare } = useCompare();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const [selectedMotor, setSelectedMotor] = useState(null);
@@ -201,6 +203,28 @@ export const Catalog = () => {
                       <Calculator className="w-4 h-4" />
                       <span>Simulasi Kredit</span>
                     </Button>
+                    <button
+                      type="button"
+                      onClick={() => toggleCompare(motor)}
+                      data-testid={`motor-compare-${motor.id}`}
+                      className={`w-full py-2 rounded-md text-sm font-medium flex items-center justify-center space-x-2 transition-all duration-300 border ${
+                        isSelected(motor.id)
+                          ? 'bg-red-600/20 border-red-500/50 text-red-400'
+                          : 'bg-transparent border-white/10 text-gray-400 hover:border-red-500/30 hover:text-red-400'
+                      }`}
+                    >
+                      {isSelected(motor.id) ? (
+                        <>
+                          <Check className="w-4 h-4" />
+                          <span>Ditambahkan ke Perbandingan</span>
+                        </>
+                      ) : (
+                        <>
+                          <GitCompare className="w-4 h-4" />
+                          <span>Bandingkan</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>

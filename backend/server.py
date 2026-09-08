@@ -666,6 +666,65 @@ async def get_stats(admin=Depends(get_current_admin)):
     }
 
 
+@api_router.get("/admin/analytics")
+async def get_analytics(admin=Depends(get_current_admin)):
+    # Last 30 days interest counts
+    now = datetime.now(timezone.utc)
+    days = []
+    for i in range(29, -1, -1):
+        d = now - timedelta(days=i)
+        days.append({
+            "date": d.strftime("%Y-%m-%d"),
+            "label": d.strftime("%d %b"),
+            "count": 0,
+        })
+    day_index = {d["date"]: idx for idx, d in enumerate(days)}
+
+    interests = await db.interests.find({}, {"created_at": 1, "motor_name": 1, "status": 1}).to_list(10000)
+    for it in interests:
+        ca = it.get("created_at")
+        if not ca:
+            continue
+        try:
+            dt = datetime.fromisoformat(ca.replace("Z", "+00:00")) if isinstance(ca, str) else ca
+            key = dt.strftime("%Y-%m-%d")
+            if key in day_index:
+                days[day_index[key]]["count"] += 1
+        except Exception:
+            continue
+
+    # Top motors by popularity
+    pipeline = [
+        {"$group": {"_id": "$motor_name", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 5},
+    ]
+    top_raw = await db.interests.aggregate(pipeline).to_list(10)
+    top_motors = [{"name": t["_id"], "count": t["count"]} for t in top_raw if t.get("_id")]
+
+    # Status distribution
+    status_pipe = [{"$group": {"_id": "$status", "count": {"$sum": 1}}}]
+    status_raw = await db.interests.aggregate(status_pipe).to_list(10)
+    status_dist = [{"status": s["_id"] or "new", "count": s["count"]} for s in status_raw]
+
+    total = len(interests)
+    today_count = days[-1]["count"] if days else 0
+    week_count = sum(d["count"] for d in days[-7:])
+    month_count = sum(d["count"] for d in days)
+
+    return {
+        "interests_by_day": days,
+        "top_motors": top_motors,
+        "status_distribution": status_dist,
+        "totals": {
+            "all_time": total,
+            "today": today_count,
+            "last_7_days": week_count,
+            "last_30_days": month_count,
+        }
+    }
+
+
 # =============== APP SETUP ================
 app.include_router(api_router)
 
