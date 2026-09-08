@@ -22,17 +22,14 @@ export const CreditSimulator = ({ open, onOpenChange, motor, onProceed }) => {
   const otr = useMemo(() => parsePrice(motor?.price), [motor]);
   const [dpPct, setDpPct] = useState(20);
   const [tenor, setTenor] = useState(23);
-  // Estimated interest rate per year (indicative, common for motor credit)
-  const [rate, setRate] = useState(9);
 
   const calc = useMemo(() => {
     const dpAmount = Math.round((otr * dpPct) / 100);
     const financed = otr - dpAmount;
-    const totalInterest = (financed * (rate / 100) * (tenor / 12));
-    const total = financed + totalInterest;
+    const total = financed;
     const monthly = tenor > 0 ? total / tenor : 0;
-    return { dpAmount, financed, monthly, totalInterest, total };
-  }, [otr, dpPct, tenor, rate]);
+    return { dpAmount, financed, monthly, total };
+  }, [otr, dpPct, tenor]);
 
   const dpOptions = [10, 15, 20, 25, 30, 40, 50];
   const tenorOptions = [11, 17, 23, 29, 35];
@@ -108,27 +105,6 @@ export const CreditSimulator = ({ open, onOpenChange, motor, onProceed }) => {
                     {v} bulan
                   </button>
                 ))}
-              </div>
-            </div>
-
-            {/* Rate */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <Label className="text-gray-300">Bunga Estimasi (per tahun)</Label>
-                <div className="text-red-500 font-bold">{rate}%</div>
-              </div>
-              <input
-                type="range"
-                min="5"
-                max="18"
-                step="0.5"
-                value={rate}
-                onChange={(e) => setRate(parseFloat(e.target.value))}
-                data-testid="rate-slider"
-                className="w-full accent-red-600"
-              />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>5%</span><span>18%</span>
               </div>
             </div>
 
