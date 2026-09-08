@@ -341,7 +341,22 @@ async def get_settings():
 @api_router.get("/motors")
 async def get_motors():
     motors = await db.motors.find({}).sort("created_at", -1).to_list(1000)
-    return [serialize_doc(m) for m in motors]
+    result = [serialize_doc(m) for m in motors]
+
+    # Compute popularity based on interest count per motor
+    pipeline = [
+        {"$group": {"_id": "$motor_name", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+    ]
+    interest_counts = await db.interests.aggregate(pipeline).to_list(100)
+    # Determine top-3 motor names as "terlaris"
+    top_names = [ic["_id"] for ic in interest_counts[:3] if ic.get("count", 0) > 0]
+    count_map = {ic["_id"]: ic["count"] for ic in interest_counts}
+
+    for m in result:
+        m["interest_count"] = count_map.get(m["name"], 0)
+        m["is_bestseller"] = m["name"] in top_names
+    return result
 
 @api_router.get("/motors/{motor_id}")
 async def get_motor(motor_id: str):
@@ -380,7 +395,26 @@ async def create_interest(data: InterestCreate):
     }
     result = await db.interests.insert_one(doc)
     doc["_id"] = result.inserted_id
-    return serialize_doc(doc)
+
+    # Build WhatsApp URL for the dealer notification
+    settings = await db.settings.find_one({}) or {}
+    dealer_phone = (settings.get("phone") or "6282343488319").replace("+", "").replace(" ", "")
+    now_str = datetime.now(timezone.utc).strftime("%d %b %Y %H:%M")
+    wa_message = (
+        f"🔔 *MINAT KONSUMEN BARU*\n\n"
+        f"📋 *Detail Konsumen:*\n"
+        f"👤 Nama: {data.name}\n"
+        f"📱 No. HP: {data.phone}\n"
+        f"🏍️ Motor: {data.motor_name}\n"
+        f"🕐 Waktu: {now_str} WIB\n\n"
+        f"Mohon segera ditindaklanjuti. Terima kasih!"
+    )
+    import urllib.parse as up
+    wa_url = f"https://wa.me/{dealer_phone}?text={up.quote(wa_message)}"
+
+    response = serialize_doc(doc)
+    response["whatsapp_url"] = wa_url
+    return response
 
 
 # =============== ADMIN AUTH ================
@@ -557,10 +591,17 @@ async def delete_interest(iid: str, admin=Depends(get_current_admin)):
         raise HTTPException(status_code=404, detail="Not found")
     return {"message": "Data minat dihapus"}
 
+class InterestStatusUpdate(BaseModel):
+    status: str
+
 @api_router.put("/admin/interests/{iid}/status")
-async def update_interest_status(iid: str, status: str = Form(...), admin=Depends(get_current_admin)):
-    await db.interests.update_one({"_id": ObjectId(iid)}, {"$set": {"status": status}})
-    return {"message": "Status diperbarui"}
+async def update_interest_status(iid: str, data: InterestStatusUpdate, admin=Depends(get_current_admin)):
+    if data.status not in ["new", "contacted", "completed"]:
+        raise HTTPException(status_code=400, detail="Status tidak valid")
+    result = await db.interests.update_one({"_id": ObjectId(iid)}, {"$set": {"status": data.status}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Not found")
+    return {"message": "Status diperbarui", "status": data.status}
 
 
 # =============== ADMIN: FILE UPLOAD ================

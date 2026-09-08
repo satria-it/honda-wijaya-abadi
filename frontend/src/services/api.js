@@ -75,6 +75,7 @@ export const adminApi = {
   // Interests
   getInterests: () => api.get('/admin/interests').then(r => r.data),
   deleteInterest: (id) => api.delete(`/admin/interests/${id}`).then(r => r.data),
+  updateInterestStatus: (id, status) => api.put(`/admin/interests/${id}/status`, { status }).then(r => r.data),
 
   // File Upload
   uploadFile: (file) => {

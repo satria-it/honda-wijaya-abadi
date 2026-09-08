@@ -35,30 +35,33 @@ export const Catalog = () => {
     }
 
     setSubmitting(true);
+    let waUrl = null;
     try {
-      // Save to backend
-      await publicApi.createInterest({
+      // Save to backend - returns whatsapp_url ready for auto-open
+      const response = await publicApi.createInterest({
         name: formData.name,
         phone: formData.phone,
         motor_id: selectedMotor.id,
         motor_name: selectedMotor.name,
       });
+      waUrl = response.whatsapp_url;
     } catch (err) {
       console.error('Failed to save interest', err);
+      // Fallback: build wa.me URL client-side
+      const message = `🔔 MINAT KONSUMEN BARU\n\n👤 Nama: ${formData.name}\n📱 No. HP: ${formData.phone}\n🏍️ Motor: ${selectedMotor.name}\n\nMohon ditindaklanjuti. Terima kasih!`;
+      waUrl = `https://wa.me/${settings.phone}?text=${encodeURIComponent(message)}`;
     }
 
-    // Format WhatsApp message
-    const message = `Halo, saya tertarik dengan:\n\nMotor: ${selectedMotor.name}\nNama: ${formData.name}\nNo. HP: ${formData.phone}\n\nMohon info lebih lanjut. Terima kasih!`;
-    const waUrl = `https://wa.me/${settings.phone}?text=${encodeURIComponent(message)}`;
-    
-    // Open WhatsApp
-    window.open(waUrl, '_blank');
-    
     // Reset form
     setFormData({ name: '', phone: '' });
     setIsDialogOpen(false);
     setSubmitting(false);
-    toast.success('Mengarahkan ke WhatsApp...');
+    toast.success('Data terkirim! Membuka WhatsApp...');
+
+    // Auto-open WhatsApp to dealer (this notifies the dealer directly)
+    setTimeout(() => {
+      window.open(waUrl, '_blank');
+    }, 300);
   };
 
   const categories = ['Semua', 'Matic', 'Sport', 'Adventure'];
@@ -132,6 +135,17 @@ export const Catalog = () => {
                   <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
                     {motor.category}
                   </div>
+
+                  {/* Bestseller Badge */}
+                  {motor.is_bestseller && (
+                    <div
+                      data-testid={`motor-bestseller-${motor.id}`}
+                      className="absolute top-4 left-4 bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center space-x-1"
+                    >
+                      <span className="animate-pulse">🔥</span>
+                      <span>TERLARIS</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
