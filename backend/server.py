@@ -199,6 +199,10 @@ class SettingsUpdate(BaseModel):
     heroTitleHighlight: Optional[str] = None
     heroSubtitle: Optional[str] = None
     footerText: Optional[str] = None
+    heroFont: Optional[str] = None
+    heroFontSize: Optional[str] = None
+    heroTitleColor: Optional[str] = None
+    heroHighlightColor: Optional[str] = None
 
 class InterestCreate(BaseModel):
     name: str

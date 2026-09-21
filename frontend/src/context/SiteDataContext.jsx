@@ -16,6 +16,10 @@ const defaultSettings = {
   heroTitleHighlight: "Kebanggaan",
   heroSubtitle: "Partner Terpercaya Berkendara Anda. Dapatkan motor Honda impian Anda dengan harga terbaik dan proses yang mudah.",
   footerText: "Dealer resmi Honda terpercaya yang siap melayani kebutuhan kendaraan Anda dengan profesional dan amanah.",
+  heroFont: "Sora",
+  heroFontSize: "large",
+  heroTitleColor: "",
+  heroHighlightColor: "",
 };
 
 export const SiteDataProvider = ({ children }) => {

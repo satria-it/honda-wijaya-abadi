@@ -1,11 +1,37 @@
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { ArrowRight, Zap, Award, Clock } from 'lucide-react';
 import { Button } from './ui/button';
 import { useSiteData } from '../context/SiteDataContext';
 import { resolveImageUrl } from '../services/api';
 
+const FONT_SIZE_CLASSES = {
+  small: 'text-4xl md:text-5xl lg:text-6xl',
+  medium: 'text-5xl md:text-6xl lg:text-7xl',
+  large: 'text-5xl md:text-7xl lg:text-8xl',
+  xlarge: 'text-6xl md:text-8xl lg:text-9xl',
+};
+
 export const Hero = () => {
   const { settings } = useSiteData();
+
+  const heroFont = settings.heroFont || 'Sora';
+  const sizeClass = FONT_SIZE_CLASSES[settings.heroFontSize] || FONT_SIZE_CLASSES.large;
+  const titleColor = settings.heroTitleColor || '';
+  const highlightColor = settings.heroHighlightColor || '';
+
+  // Load the selected Google Font dynamically
+  useEffect(() => {
+    const id = 'hero-dynamic-font';
+    let link = document.getElementById(id);
+    if (!link) {
+      link = document.createElement('link');
+      link.id = id;
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+    link.href = `https://fonts.googleapis.com/css2?family=${heroFont.replace(/ /g, '+')}:wght@400;600;700;800;900&display=swap`;
+  }, [heroFont]);
 
   const handleWhatsApp = () => {
     window.open(`https://wa.me/${settings.phone}`, '_blank');
